@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Base ─────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --scrollbar-width: 6px;
+    --scrollbar-color: theme('colors.gray.300');
+  }
+
+  html.dark {
+    --scrollbar-color: theme('colors.gray.600');
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-color) transparent;
+  }
+
+  *::-webkit-scrollbar         { width: var(--scrollbar-width); height: var(--scrollbar-width); }
+  *::-webkit-scrollbar-track   { background: transparent; }
+  *::-webkit-scrollbar-thumb   { background-color: var(--scrollbar-color); border-radius: 999px; }
+
+  body {
+    @apply bg-gray-50 text-gray-900;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .dark body {
+    @apply bg-gray-950 text-gray-100;
+  }
+}
+
+/* ── Components ───────────────────────────────────────── */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-brand-600 hover:bg-brand-700
+           text-white font-medium rounded-lg transition-colors duration-150
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800
+           border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200
+           font-medium rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700
+           transition-colors duration-150 focus:outline-none focus:ring-2
+           focus:ring-brand-500 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-2 px-3 py-2 text-gray-500 dark:text-gray-400
+           hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors duration-150
+           focus:outline-none;
+  }
+
+  .card {
+    @apply bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm;
+  }
+
+  .input {
+    @apply block w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700
+           rounded-lg text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500
+           focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-brand-500
+           transition-colors duration-150;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-urgent      { @apply bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400; }
+  .badge-promotional { @apply bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400; }
+  .badge-social      { @apply bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400; }
+  .badge-general     { @apply bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400; }
+}
+
+/* ── Email Body Styles ────────────────────────────────── */
+.email-body {
+  @apply text-sm text-gray-800 dark:text-gray-200 leading-relaxed;
+}
+
+.email-body a       { @apply text-brand-600 hover:underline; }
+.email-body img     { @apply max-w-full h-auto rounded; }
+.email-body table   { @apply w-full border-collapse; }
+.email-body td,
+.email-body th      { @apply border border-gray-200 dark:border-gray-700 p-2; }
+.email-body blockquote {
+  @apply border-l-4 border-gray-300 dark:border-gray-600 pl-4 my-2 text-gray-500 dark:text-gray-400;
+}
