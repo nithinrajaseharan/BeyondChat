@@ -1,4 +1,4 @@
-# BeyondChats � Gmail Integration Dashboard
+﻿# BeyondChats � Gmail Integration Dashboard
 
 Built for the BeyondChats assignment by **Nithin Rajaseharan**.
 
@@ -27,61 +27,101 @@ The assignment asked for a Gmail integration dashboard � connect Gmail, sync e
 
 ## Architecture
 
-```
-Browser (React + Vite)
-        |
-        |  REST API (JSON over HTTP)
-        v
-Laravel 11 API  ---  MySQL
-  (AuthController, GmailController, EmailController)
-        |
-        |  Google OAuth2 + Gmail API calls
-        v
-  Google APIs
-        |
-        |  dispatched to queue
-        v
-  Laravel Queue Worker
-  (SyncEmailsJob - fetches and stores threads in background)
+```mermaid
+graph TD
+    Browser["Browser\nReact 18 + Vite"]
+
+    subgraph Laravel ["Laravel 11 API (port 8000)"]
+        Auth["AuthController\nregister / login / logout"]
+        Gmail["GmailController\nOAuth flow / sync / status"]
+        Email["EmailController\nthreads / reply / attachments"]
+        Service["GmailService\nGoogle API wrapper"]
+        Job["SyncEmailsJob\nqueue worker"]
+    end
+
+    subgraph DB ["MySQL"]
+        Users["users"]
+        Integrations["gmail_integrations\ntokens + sync progress"]
+        Threads["email_threads"]
+        Emails["emails"]
+        Attachments["email_attachments"]
+    end
+
+    Google["Google APIs\nOAuth2 + Gmail API"]
+
+    Browser -->|"REST JSON + Bearer token"| Auth
+    Browser -->|REST JSON| Gmail
+    Browser -->|REST JSON| Email
+    Gmail --> Service
+    Email --> Service
+    Service -->|"OAuth2 + API calls"| Google
+    Gmail -->|dispatch| Job
+    Job -->|"poll Gmail API"| Google
+    Job -->|upsert| DB
+    Auth --- Users
+    Gmail --- Integrations
+    Email --- Threads
+    Email --- Emails
+    Email --- Attachments
 ```
 
 **Why queue the sync?**
-Email sync hits the Gmail API dozens of times and can take 10�60 seconds depending on volume. Running it synchronously in an HTTP request would time out. So the API immediately returns "sync started", a queue worker does the actual work in the background, and the frontend polls `/gmail/sync-status` every 2 seconds to show progress.
+Email sync hits the Gmail API dozens of times and can take 10-60 seconds depending on volume. Running it synchronously would time out. The API returns "sync started" immediately, a queue worker does the actual work, and the frontend polls `/gmail/sync-status` every 2 seconds to show progress.
 
 ---
 
 ## Data Flow
 
-```
-1. REGISTER / LOGIN
-   Browser -> POST /api/auth/register
-           <- Sanctum bearer token (stored in localStorage)
+```mermaid
+sequenceDiagram
+    actor User
+    participant React as React Frontend
+    participant API as Laravel API
+    participant DB as MySQL
+    participant Google as Google OAuth + Gmail API
+    participant Queue as Queue Worker
 
-2. CONNECT GMAIL
-   Browser -> GET /api/gmail/auth-url
-           <- Google OAuth URL (bearer token embedded as state param)
-   Browser redirects to Google -> user approves
-   Google -> GET /api/gmail/callback?code=...&state=<token>
-   Laravel exchanges code for access + refresh tokens
-   Tokens saved to gmail_integrations table
-   Laravel -> redirect to /integrations?connected=true
+    Note over User,Queue: 1 — Register / Login
+    User->>React: fill form
+    React->>API: POST /api/auth/register or /login
+    API->>DB: create / verify user
+    API-->>React: Sanctum bearer token
+    React-->>User: stored in localStorage, redirect to dashboard
 
-3. SYNC EMAILS
-   Browser -> POST /api/gmail/sync { days: 30 }
-   Laravel dispatches SyncEmailsJob to queue
-   Queue worker: fetch thread list -> for each thread fetch full messages
-               -> parse headers/body/attachments -> save to DB
-               -> update sync_progress % on each batch
-   Frontend polls GET /api/gmail/sync-status every 2s -> updates progress bar
+    Note over User,Queue: 2 — Connect Gmail
+    User->>React: click Connect Gmail
+    React->>API: GET /api/gmail/auth-url
+    API-->>React: Google OAuth URL (state = bearer token)
+    React-->>User: redirect to Google
+    User->>Google: approve permissions
+    Google->>API: GET /api/gmail/callback?code=...&state=token
+    API->>Google: exchange code for access + refresh tokens
+    API->>DB: save tokens to gmail_integrations
+    API-->>React: redirect to /integrations?connected=true
 
-4. READ EMAILS
-   Browser -> GET /api/emails           (paginated list)
-   Browser -> GET /api/emails/{id}      (full thread + all messages)
+    Note over User,Queue: 3 — Sync Emails
+    User->>React: pick day range, click Sync
+    React->>API: POST /api/gmail/sync {days: 30}
+    API->>Queue: dispatch SyncEmailsJob
+    API-->>React: 200 sync started
+    loop every 2 seconds
+        React->>API: GET /api/gmail/sync-status
+        API-->>React: {progress: 42, synced: 84, total: 200}
+    end
+    Queue->>Google: list thread IDs
+    Queue->>Google: fetch each thread (full messages)
+    Queue->>DB: upsert threads, emails, attachments
+    Queue->>DB: update sync_progress on each batch
 
-5. REPLY
-   Browser -> POST /api/emails/{id}/reply { body, to, cc }
-   Laravel uses stored access token (auto-refreshes if expired)
-   Sends via Gmail API -> confirms sent
+    Note over User,Queue: 4 — Read and Reply
+    User->>React: open a thread
+    React->>API: GET /api/emails/{id}
+    API->>DB: fetch thread + emails + attachments
+    API-->>React: full thread JSON
+    User->>React: write reply, click Send
+    React->>API: POST /api/emails/{id}/reply
+    API->>Google: send via Gmail API (auto-refreshes token if expired)
+    API-->>React: 200 sent
 ```
 
 ---
@@ -225,3 +265,4 @@ BeyondChat/
 | PATCH | `/api/emails/{id}/read` | yes | Mark as read |
 | GET | `/api/emails/analytics` | yes | Volume + sender stats |
 | GET | `/api/emails/attachment/{id}` | yes | Download file |
+
