@@ -1,8 +1,8 @@
-﻿# BeyondChats � Gmail Integration Dashboard
+﻿# BeyondChats - Gmail Integration Dashboard
 
 Built for the BeyondChats assignment by **Nithin Rajaseharan**.
 
-Stack: React 18 + Vite � Laravel 11 � MySQL � Google Gmail API � Laravel Sanctum
+Stack: React 18 + Vite | Laravel 11 | MySQL | Google Gmail API | Laravel Sanctum
 
 ---
 
@@ -14,14 +14,13 @@ Stack: React 18 + Vite � Laravel 11 � MySQL � Google Gmail API � Laravel
 
 ## What I Built
 
-The assignment asked for a Gmail integration dashboard � connect Gmail, sync emails, read threads, reply. I built that, then added a few extras that I thought would make it genuinely useful rather than just a technical demo:
+The assignment asked for a Gmail integration dashboard — connect Gmail, sync emails, read threads, reply. I built that, then added a few extras that I thought would make it genuinely useful rather than just a technical demo:
 
-- **Email Analytics** � graphs showing email volume over time and top senders, because a raw email list alone doesn't tell you much
-- **Auto-categorization** � labels like Urgent / Promotional / Social / General inferred from subject + sender at sync time
-- **Dark mode** � fully implemented, not just a wrapper
-- **Star threads** � quick way to flag emails you want to revisit
-- **Real-time sync progress bar** � polls the backend every 2 seconds while the queue worker runs, so you can see it actually doing something
-- **Search + filter** � filter by category, search by subject/sender across all synced threads- **Thread status** — mark any thread as Open / In Progress / Resolved, turning the inbox into a lightweight support queue. Status is colour-coded (gray / amber / green) and shown in both the list and the thread header
+- **Email Analytics** — graphs showing email volume over time and top senders, because a raw email list alone doesn't tell you much
+- **Auto-categorization** — labels like Urgent / Promotional / Social / General inferred from subject + sender at sync time
+- **Star threads** — quick way to flag emails you want to revisit
+- **Real-time sync progress bar** — polls the backend every 2 seconds while the queue worker runs, so you can see it actually doing something
+- **Search + filter** — filter by category, search by subject/sender across all synced threads- **Thread status** — mark any thread as Open / In Progress / Resolved, turning the inbox into a lightweight support queue. Status is colour-coded (gray / amber / green) and shown in both the list and the thread header
 - **SLA warning** — a red clock icon appears next to the timestamp whenever an unread thread has been waiting more than 4 hours, so nothing slips through
 - **Keyboard navigation** — full keyboard control without touching the mouse: `J`/`K` move between threads, `R` toggles the reply box, `S` stars/unstars, `Escape` closes the thread, `?` opens a shortcuts help overlay
 - **Quick reply templates** — one-click pre-written responses ("Thanks for reaching out…", "Could you share more details…", etc.) that fill the reply box instantly
