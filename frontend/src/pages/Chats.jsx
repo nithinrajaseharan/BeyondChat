@@ -26,9 +26,23 @@ export default function Chats() {
   // Build query key
   const queryParams = { search, category, starred: starred ? '1' : '', page }
 
+  // Poll gmail-status so we know when a sync is running
+  const { data: gmailStatus } = useQuery({
+    queryKey: ['gmail-status'],
+    queryFn:  () => api.get('/gmail/status').then(r => r.data),
+    refetchInterval: (query) => {
+      const d = query.state.data
+      return (d?.sync_status === 'syncing' || d?.sync_status === 'pending') ? 2000 : false
+    },
+  })
+
+  const isSyncing = gmailStatus?.sync_status === 'syncing' || gmailStatus?.sync_status === 'pending'
+
   const { data, isLoading } = useQuery({
     queryKey: ['threads', queryParams],
     queryFn:  () => api.get('/emails', { params: queryParams }).then(r => r.data),
+    // Auto-refresh the thread list while a sync is in progress
+    refetchInterval: isSyncing ? 3000 : false,
   })
 
   const selectThread = (id) => {

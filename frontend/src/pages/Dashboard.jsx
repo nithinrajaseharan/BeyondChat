@@ -21,7 +21,7 @@ function StatCard({ icon: Icon, label, value, color }) {
 export default function Dashboard() {
   const { user } = useAuth()
 
-  const { data: gmailStatus } = useQuery({
+  const { data: gmailStatus, isLoading: statusLoading } = useQuery({
     queryKey: ['gmail-status'],
     queryFn: () => api.get('/gmail/status').then(r => r.data),
   })
@@ -51,7 +51,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      {!connected && (
+      {!statusLoading && !connected && (
         <div className="card p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 border-brand-200 dark:border-brand-800 bg-brand-50 dark:bg-brand-950/20">
           <div className="w-10 h-10 bg-brand-100 dark:bg-brand-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
             <Plug className="w-5 h-5 text-brand-600" />

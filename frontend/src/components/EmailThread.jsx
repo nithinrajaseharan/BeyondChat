@@ -115,10 +115,18 @@ export default function EmailThread({ threadId, onBack }) {
   })
 
   useEffect(() => {
-    if (data) {
-      qc.invalidateQueries({ queryKey: ['threads'] })
-    }
-  }, [data, qc])
+    if (!threadId) return
+    // Optimistically mark this thread as read in every cached thread list
+    // so the unread dot disappears immediately without waiting for a refetch
+    qc.setQueriesData({ queryKey: ['threads'] }, (old) => {
+      if (!old?.data) return old
+      return { ...old, data: old.data.map(t => t.id === threadId ? { ...t, is_read: true } : t) }
+    })
+    qc.setQueriesData({ queryKey: ['threads-preview'] }, (old) => {
+      if (!old?.data) return old
+      return { ...old, data: old.data.map(t => t.id === threadId ? { ...t, is_read: true } : t) }
+    })
+  }, [threadId, qc])
 
   const starMutation = useMutation({
     mutationFn: () => api.patch(`/emails/${threadId}/star`),
