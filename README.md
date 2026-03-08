@@ -8,7 +8,7 @@ Stack: React 18 + Vite � Laravel 11 � MySQL � Google Gmail API � Laravel
 
 ## Video Demo
 
-
+[Watch the demo on Google Drive](https://drive.google.com/file/d/1j_xoT6Hb9VuBljzor6d2JFG6c5HKT60K/view?usp=sharing)
 
 ---
 
