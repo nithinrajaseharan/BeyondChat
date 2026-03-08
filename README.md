@@ -259,12 +259,12 @@ BeyondChat/
 
 | Method | Endpoint | Auth | Notes |
 |--------|----------|------|-------|
-| POST | `/api/auth/register` | � | |
-| POST | `/api/auth/login` | � | Returns Sanctum token |
+| POST | `/api/auth/register` | no | |
+| POST | `/api/auth/login` | no | Returns Sanctum token |
 | POST | `/api/auth/logout` | yes | |
 | GET | `/api/auth/me` | yes | |
 | GET | `/api/gmail/auth-url` | yes | Returns Google OAuth URL |
-| GET | `/api/gmail/callback` | � | Google redirects here after approval |
+| GET | `/api/gmail/callback` | no | Google redirects here after approval |
 | GET | `/api/gmail/status` | yes | Connection info + sync state |
 | POST | `/api/gmail/sync` | yes | `{ days: 1-90 }` |
 | GET | `/api/gmail/sync-status` | yes | Poll for progress % |
