@@ -2,17 +2,27 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api.js'
 import toast from 'react-hot-toast'
-import { X, Send, Loader2, ChevronDown } from 'lucide-react'
+import { X, Send, Loader2, ChevronDown, Sparkles } from 'lucide-react'
+
+const TEMPLATES = [
+  "Thanks for reaching out! I'll look into this and get back to you shortly.",
+  "Got it, I'll take care of this right away.",
+  "Could you share more details about the issue you're experiencing?",
+  "Happy to help! Here's what I'd suggest: ",
+  "This has been resolved. Please let me know if anything else comes up.",
+  "I've forwarded this to the relevant team. You'll hear back within 24 hours.",
+]
 
 export default function ReplyBox({ thread, onClose }) {
   const qc = useQueryClient()
 
   // Determine the default reply-to address (last sender in thread who isn't the user)
   const lastEmail = thread.emails?.[thread.emails.length - 1]
-  const [to,      setTo]      = useState(lastEmail?.from_email || '')
-  const [body,    setBody]    = useState('')
-  const [showCC,  setShowCC]  = useState(false)
-  const [cc,      setCc]      = useState('')
+  const [to,            setTo]           = useState(lastEmail?.from_email || '')
+  const [body,          setBody]         = useState('')
+  const [showCC,        setShowCC]       = useState(false)
+  const [cc,            setCc]           = useState('')
+  const [showTemplates, setShowTemplates] = useState(false)
 
   const mutation = useMutation({
     mutationFn: (data) => api.post(`/emails/${thread.id}/reply`, data),
@@ -95,9 +105,34 @@ export default function ReplyBox({ thread, onClose }) {
         />
 
         <div className="flex items-center justify-between pt-1">
-          <p className="text-xs text-gray-400">
-            Replying to: <span className="font-medium">{thread.subject}</span>
-          </p>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowTemplates(s => !s)}
+                className="btn-ghost text-xs gap-1"
+              >
+                <Sparkles className="w-3.5 h-3.5" /> Templates
+              </button>
+              {showTemplates && (
+                <div className="absolute bottom-full left-0 mb-1 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg overflow-hidden z-10">
+                  {TEMPLATES.map((t, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => { setBody(t); setShowTemplates(false) }}
+                      className="w-full text-left text-xs px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 border-b border-gray-100 dark:border-gray-800 last:border-0"
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <p className="text-xs text-gray-400">
+              Thread: <span className="font-medium">{thread.subject}</span>
+            </p>
+          </div>
           <button
             onClick={handleSend}
             disabled={mutation.isPending}

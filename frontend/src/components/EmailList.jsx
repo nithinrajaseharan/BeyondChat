@@ -1,5 +1,5 @@
-import { formatDistanceToNow } from 'date-fns'
-import { Star, Paperclip, Loader2 } from 'lucide-react'
+import { formatDistanceToNow, differenceInHours } from 'date-fns'
+import { Star, Paperclip, Loader2, Clock } from 'lucide-react'
 
 const CATEGORY_DOT = {
   urgent:      'bg-red-500',
@@ -8,11 +8,19 @@ const CATEGORY_DOT = {
   general:     'bg-gray-300 dark:bg-gray-600',
 }
 
+const STATUS_BADGE = {
+  in_progress: 'bg-amber-100 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400',
+  resolved:    'bg-green-100 text-green-600 dark:bg-green-900/20 dark:text-green-400',
+}
+
 function ThreadRow({ thread, selected, onClick }) {
   const initial = (thread.from_name || thread.from_email || '?')[0].toUpperCase()
   const timeAgo = thread.last_message_at
     ? formatDistanceToNow(new Date(thread.last_message_at), { addSuffix: true })
     : ''
+  const slaWarning = !thread.is_read &&
+    !!thread.last_message_at &&
+    differenceInHours(new Date(), new Date(thread.last_message_at)) > 4
 
   return (
     <button
@@ -38,7 +46,10 @@ function ThreadRow({ thread, selected, onClick }) {
               {thread.from_name || thread.from_email || 'Unknown'}
             </p>
           </div>
-          <span className="text-xs text-gray-400 flex-shrink-0">{timeAgo}</span>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            {slaWarning && <Clock className="w-3 h-3 text-red-400" title="Waiting over 4 hours" />}
+            <span className={`text-xs flex-shrink-0 ${slaWarning ? 'text-red-400 font-medium' : 'text-gray-400'}`}>{timeAgo}</span>
+          </div>
         </div>
 
         <p className={`text-xs truncate mt-0.5 ${!thread.is_read ? 'font-medium text-gray-800 dark:text-gray-200' : 'text-gray-500 dark:text-gray-400'}`}>
@@ -56,6 +67,11 @@ function ThreadRow({ thread, selected, onClick }) {
           )}
           {thread.is_starred && <Star className="w-3 h-3 text-amber-400 fill-amber-400" />}
           {thread.has_attachments && <Paperclip className="w-3 h-3 text-gray-400" />}
+          {thread.status && thread.status !== 'open' && (
+            <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium leading-none ${STATUS_BADGE[thread.status]}`}>
+              {thread.status === 'in_progress' ? 'In Progress' : 'Resolved'}
+            </span>
+          )}
         </div>
       </div>
     </button>

@@ -49,5 +49,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{threadId}/reply',         [EmailController::class, 'reply']);
         Route::patch('/{threadId}/star',         [EmailController::class, 'toggleStar']);
         Route::patch('/{threadId}/read',         [EmailController::class, 'markRead']);
+        Route::patch('/{threadId}/status',       [EmailController::class, 'updateStatus']);
     });
 });

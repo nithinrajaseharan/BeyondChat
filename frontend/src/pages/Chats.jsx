@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api.js'
 import EmailList from '../components/EmailList.jsx'
 import EmailThread from '../components/EmailThread.jsx'
+import { useKeyboardNav } from '../hooks/useKeyboardNav.js'
 import { Search, X, Filter, Inbox } from 'lucide-react'
 
 const CATEGORIES = [
@@ -20,6 +21,7 @@ export default function Chats() {
   const [category,   setCategory]   = useState('')
   const [starred,    setStarred]    = useState(false)
   const [page,       setPage]       = useState(1)
+  const [showHelp,   setShowHelp]   = useState(false)
 
   const selectedId = searchParams.get('thread') ? parseInt(searchParams.get('thread')) : null
 
@@ -49,8 +51,42 @@ export default function Chats() {
     setSearchParams(id ? { thread: String(id) } : {})
   }
 
+  useKeyboardNav(data?.data || [], selectedId, selectThread)
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return
+      if (e.key === '?') { e.preventDefault(); setShowHelp(s => !s) }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
+
   return (
     <div className="flex h-[calc(100vh-64px)] overflow-hidden">
+      {showHelp && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowHelp(false)}>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl p-6 w-80" onClick={e => e.stopPropagation()}>
+            <h3 className="font-semibold text-gray-900 dark:text-white mb-4">Keyboard Shortcuts</h3>
+            <div className="space-y-2.5">
+              {[
+                ['J', 'Next email'],
+                ['K', 'Previous email'],
+                ['R', 'Reply / Toggle reply'],
+                ['S', 'Star / Unstar'],
+                ['Esc', 'Close thread'],
+                ['?', 'Toggle this help'],
+              ].map(([key, desc]) => (
+                <div key={key} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500 dark:text-gray-400">{desc}</span>
+                  <kbd className="px-2 py-0.5 text-xs font-mono bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded">{key}</kbd>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setShowHelp(false)} className="mt-5 w-full btn-ghost text-sm">Close</button>
+          </div>
+        </div>
+      )}
       <div className={`flex flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900
                        ${selectedId ? 'hidden md:flex md:w-80 lg:w-96' : 'flex w-full md:w-80 lg:w-96'}`}>
 
@@ -131,6 +167,7 @@ export default function Chats() {
             <Inbox className="w-16 h-16 mb-4 opacity-40" />
             <p className="font-medium text-gray-500 dark:text-gray-400">Select an email to read</p>
             <p className="text-sm mt-1">Your conversations will appear here</p>
+            <p className="text-xs mt-4 opacity-50">Press <kbd className="px-1.5 py-0.5 font-mono bg-gray-100 dark:bg-gray-800 rounded text-xs">?</kbd> for keyboard shortcuts</p>
           </div>
         )}
       </div>

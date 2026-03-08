@@ -18,6 +18,12 @@ const CATEGORY_BADGE = {
   general:     'badge-general',
 }
 
+const STATUS_STYLE = {
+  open:        'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300',
+  in_progress: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',
+  resolved:    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300',
+}
+
 function EmailMessage({ email, isLast, defaultOpen }) {
   const [open, setOpen] = useState(defaultOpen)
 
@@ -138,6 +144,30 @@ export default function EmailThread({ threadId, onBack }) {
     },
   })
 
+  const statusMutation = useMutation({
+    mutationFn: (status) => api.patch(`/emails/${threadId}/status`, { status }),
+    onSuccess: (res) => {
+      qc.setQueryData(['thread', threadId], (old) =>
+        old ? { ...old, thread: { ...old.thread, status: res.data.status } } : old
+      )
+      qc.setQueriesData({ queryKey: ['threads'] }, (old) => {
+        if (!old?.data) return old
+        return { ...old, data: old.data.map(t => t.id === threadId ? { ...t, status: res.data.status } : t) }
+      })
+    },
+  })
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      if (e.key === 'r') { e.preventDefault(); setShowReply(s => !s) }
+      if (e.key === 's') { e.preventDefault(); starMutation.mutate() }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [starMutation])
+
   if (isLoading) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -179,11 +209,21 @@ export default function EmailThread({ threadId, onBack }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 flex-shrink-0">
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <select
+            value={thread.status || 'open'}
+            onChange={e => statusMutation.mutate(e.target.value)}
+            className={`text-xs px-2.5 py-1 rounded-full font-medium cursor-pointer outline-none border-0 ${STATUS_STYLE[thread.status || 'open']}`}
+            title="Thread status"
+          >
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+          </select>
           <button
             onClick={() => starMutation.mutate()}
             className="btn-ghost"
-            title={thread.is_starred ? 'Unstar' : 'Star'}
+            title={thread.is_starred ? 'Unstar (S)' : 'Star (S)'}
           >
             <Star className={`w-5 h-5 ${thread.is_starred ? 'fill-amber-400 text-amber-400' : 'text-gray-400'}`} />
           </button>

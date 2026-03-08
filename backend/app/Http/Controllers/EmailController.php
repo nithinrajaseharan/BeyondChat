@@ -65,6 +65,7 @@ class EmailController extends Controller
                 'gmail_thread_id' => $thread->gmail_thread_id,
                 'subject'         => $thread->subject,
                 'category'        => $thread->category,
+                'status'          => $thread->status ?? 'open',
                 'is_starred'      => $thread->is_starred,
                 'participants'    => $thread->participants,
                 'message_count'   => $thread->message_count,
@@ -121,6 +122,14 @@ class EmailController extends Controller
             'Content-Disposition' => 'attachment; filename="' . addslashes($attachment->filename) . '"',
             'Content-Length'      => strlen($binary),
         ]);
+    }
+
+    public function updateStatus(Request $request, int $threadId): JsonResponse
+    {
+        $validated = $request->validate(['status' => 'required|in:open,in_progress,resolved']);
+        $thread = EmailThread::where('user_id', $request->user()->id)->findOrFail($threadId);
+        $thread->update(['status' => $validated['status']]);
+        return response()->json(['status' => $thread->status]);
     }
 
     public function toggleStar(Request $request, int $threadId): JsonResponse
@@ -204,6 +213,7 @@ class EmailController extends Controller
             'subject'         => $thread->subject,
             'snippet'         => $thread->snippet,
             'category'        => $thread->category,
+            'status'          => $thread->status ?? 'open',
             'is_read'         => $thread->is_read,
             'is_starred'      => $thread->is_starred,
             'has_attachments' => $thread->has_attachments,
