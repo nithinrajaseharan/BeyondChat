@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api.js'
 import DOMPurify from 'dompurify'
@@ -112,11 +112,13 @@ export default function EmailThread({ threadId, onBack }) {
   const { data, isLoading } = useQuery({
     queryKey: ['thread', threadId],
     queryFn:  () => api.get(`/emails/${threadId}`).then(r => r.data),
-    onSuccess: () => {
-      // Invalidate thread list to update unread count
-      qc.invalidateQueries({ queryKey: ['threads'] })
-    },
   })
+
+  useEffect(() => {
+    if (data) {
+      qc.invalidateQueries({ queryKey: ['threads'] })
+    }
+  }, [data, qc])
 
   const starMutation = useMutation({
     mutationFn: () => api.patch(`/emails/${threadId}/star`),

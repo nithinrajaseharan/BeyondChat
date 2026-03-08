@@ -50,7 +50,10 @@ export default function Integrations() {
   const { data: status, isLoading } = useQuery({
     queryKey: ['gmail-status'],
     queryFn:  () => api.get('/gmail/status').then(r => r.data),
-    refetchInterval: (data) => (data?.sync_status === 'syncing' || data?.sync_status === 'pending') ? 2000 : false,
+    refetchInterval: (query) => {
+      const d = query.state.data
+      return (d?.sync_status === 'syncing' || d?.sync_status === 'pending') ? 2000 : false
+    },
   })
 
   const connectMutation = useMutation({
