@@ -14,6 +14,24 @@ const CATEGORY_COLORS = {
   social:      '#3b82f6',
 }
 
+function StatCard({ icon: Icon, label, value, gradient, className = '' }) {
+  return (
+    <div className={`rounded-2xl p-5 ${gradient} ${className} relative overflow-hidden text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300`}>
+      <div className="absolute -right-3 -top-3 opacity-15">
+        <Icon className="w-24 h-24" />
+      </div>
+      <p className="text-3xl font-bold tabular-nums tracking-tight">{value ?? '—'}</p>
+      <p className="text-sm font-medium mt-1 opacity-85">{label}</p>
+    </div>
+  )
+}
+
+function SectionHeading({ children }) {
+  return (
+    <h2 className="font-semibold text-gray-900 dark:text-white mb-4 pl-3 border-l-4 border-brand-500">{children}</h2>
+  )
+}
+
 function Card({ children, className = '' }) {
   return <div className={`card p-5 ${className}`}>{children}</div>
 }
@@ -50,53 +68,35 @@ export default function Analytics() {
   }))
 
   return (
-    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6 animate-fade-in">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Analytics</h1>
+    <div className="p-4 md:p-6 max-w-5xl mx-auto space-y-6 animate-fade-in-up">
+      <h1 className="text-3xl font-bold gradient-text animate-fade-in-up stagger-1">Analytics</h1>
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <Card className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center">
-            <Inbox className="w-5 h-5 text-brand-600" />
-          </div>
-          <div>
-            <p className="text-xl font-bold text-gray-900 dark:text-white">{data.total_threads}</p>
-            <p className="text-xs text-gray-500">Total Threads</p>
-          </div>
-        </Card>
-        <Card className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-            <TrendingUp className="w-5 h-5 text-red-500" />
-          </div>
-          <div>
-            <p className="text-xl font-bold text-gray-900 dark:text-white">{data.unread}</p>
-            <p className="text-xs text-gray-500">Unread</p>
-          </div>
-        </Card>
-        <Card className="flex items-center gap-3 col-span-2 md:col-span-1">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-            <Paperclip className="w-5 h-5 text-amber-500" />
-          </div>
-          <div>
-            <p className="text-xl font-bold text-gray-900 dark:text-white">{data.with_attach}</p>
-            <p className="text-xs text-gray-500">With Attachments</p>
-          </div>
-        </Card>
+        <StatCard icon={Inbox}     label="Total Threads"   value={data.total_threads} gradient="bg-gradient-to-br from-brand-500 to-brand-700"   className="animate-fade-in-up stagger-1" />
+        <StatCard icon={TrendingUp} label="Unread"          value={data.unread}        gradient="bg-gradient-to-br from-red-400 to-rose-600"      className="animate-fade-in-up stagger-2" />
+        <StatCard icon={Paperclip}  label="With Attachments" value={data.with_attach}  gradient="bg-gradient-to-br from-amber-400 to-orange-500"  className="animate-fade-in-up stagger-3 col-span-2 md:col-span-1" />
       </div>
 
       {data.volume?.length > 0 && (
-        <Card>
-          <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Email Volume — Last 30 Days</h2>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={data.volume} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+        <Card className="animate-fade-in-up stagger-4">
+          <SectionHeading>Email Volume — Last 30 Days</SectionHeading>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={data.volume} margin={{ top: 4, right: 0, left: -20, bottom: 0 }}>
+              <defs>
+                <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
+                  <stop offset="100%" stopColor="#6366f1" stopOpacity={0.7} />
+                </linearGradient>
+              </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="day" tick={{ fontSize: 11, fill: '#9ca3af' }}
                 tickFormatter={d => new Date(d).toLocaleDateString('en', { month: 'short', day: 'numeric' })} />
               <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} />
               <Tooltip
-                contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: 12 }}
+                contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: 12, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}
                 labelFormatter={d => new Date(d).toDateString()}
               />
-              <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} name="Emails" />
+              <Bar dataKey="count" fill="url(#barGrad)" radius={[6, 6, 0, 0]} name="Emails" />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -104,8 +104,8 @@ export default function Analytics() {
 
       <div className="grid md:grid-cols-2 gap-4">
         {pieData.length > 0 && (
-          <Card>
-            <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Category Breakdown</h2>
+          <Card className="animate-fade-in-up stagger-5">
+            <SectionHeading>Category Breakdown</SectionHeading>
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
                 <Pie data={pieData} cx="50%" cy="50%" innerRadius={50} outerRadius={80}
@@ -122,8 +122,8 @@ export default function Analytics() {
         )}
 
         {data.top_senders?.length > 0 && (
-          <Card>
-            <h2 className="font-semibold text-gray-900 dark:text-white mb-4">Top Senders</h2>
+          <Card className="animate-fade-in-up stagger-6">
+            <SectionHeading>Top Senders</SectionHeading>
             <div className="space-y-3">
               {data.top_senders.map((sender, i) => {
                 const max = data.top_senders[0].count
@@ -135,7 +135,7 @@ export default function Analytics() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs font-medium text-gray-700 dark:text-gray-300 truncate">{sender.name || sender.email}</p>
                       <div className="mt-1 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
-                        <div className="h-full bg-brand-500 rounded-full" style={{ width: `${(sender.count / max) * 100}%` }} />
+                        <div className="h-full bg-gradient-to-r from-brand-500 to-indigo-500 rounded-full transition-all duration-700" style={{ width: `${(sender.count / max) * 100}%` }} />
                       </div>
                     </div>
                     <span className="text-xs font-medium text-gray-500 dark:text-gray-400 flex-shrink-0">{sender.count}</span>

@@ -50,14 +50,20 @@ export default function Layout() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col dark:bg-gray-950">
+    <div className="min-h-screen flex flex-col" style={{background: 'linear-gradient(135deg, #f0f4ff 0%, #fafafa 40%, #f5f0ff 100%)'}}>
 
-      <header className="sticky top-0 z-40 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 h-16 flex items-center px-4 gap-3">
+      {/* Ambient background blobs */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="animate-float absolute -top-40 -right-40 w-[600px] h-[600px] rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 opacity-[0.07] blur-3xl" />
+        <div className="animate-float-rev absolute bottom-0 -left-40 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-violet-400 to-purple-500 opacity-[0.07] blur-3xl" />
+      </div>
+
+      <header className="sticky top-0 z-40 bg-white/70 dark:bg-gray-900/70 backdrop-blur-xl border-b border-white/60 dark:border-gray-800/70 h-16 flex items-center px-4 gap-3 shadow-sm">
         <div className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-8 h-8 bg-brand-600 rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
             <Mail className="w-4 h-4 text-white" />
           </div>
-          <span className="font-bold text-gray-900 dark:text-white hidden sm:block">BeyondChats</span>
+          <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-indigo-500 hidden sm:block">BeyondChats</span>
         </div>
 
         <nav className="hidden md:flex items-center gap-1 ml-4">
@@ -66,10 +72,10 @@ export default function Layout() {
               key={to}
               to={to}
               className={({ isActive }) =>
-                `flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                `flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                   isActive
-                    ? 'bg-brand-50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300'
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    ? 'bg-gradient-to-r from-brand-500 to-indigo-500 text-white shadow-md shadow-brand-500/25'
+                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100/80 dark:hover:bg-gray-800'
                 }`
               }
             >
@@ -94,7 +100,7 @@ export default function Layout() {
           </button>
 
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
               {user?.name?.[0]?.toUpperCase() || 'U'}
             </div>
             <span className="text-sm font-medium text-gray-700 dark:text-gray-200 hidden lg:block">
@@ -161,7 +167,7 @@ export default function Layout() {
         </div>
       )}
 
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto relative z-10">
         <Outlet />
       </main>
     </div>

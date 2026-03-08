@@ -27,17 +27,25 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-50 via-white to-blue-50 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-brand-600 rounded-2xl mb-4 shadow-lg shadow-brand-200">
-            <Mail className="w-7 h-7 text-white" />
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-950 dark:via-slate-900 dark:to-indigo-950">
+
+      {/* Animated background blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="animate-float absolute -top-24 -left-24 w-[500px] h-[500px] rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 opacity-40 blur-3xl" />
+        <div className="animate-float-rev absolute top-1/3 -right-32 w-96 h-96 rounded-full bg-gradient-to-br from-violet-500 to-purple-400 opacity-35 blur-3xl" />
+        <div className="animate-float absolute -bottom-20 left-1/4 w-80 h-80 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 opacity-30 blur-3xl" style={{animationDelay: '3s'}} />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="text-center mb-8 animate-fade-in-up stagger-1">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-brand-500 to-indigo-600 rounded-2xl mb-4 shadow-xl shadow-brand-500/30">
+            <Mail className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">BeyondChats</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1 text-sm">Sign in to your dashboard</p>
+          <h1 className="text-3xl font-bold gradient-text">BeyondChats</h1>
+          <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm">Sign in to your dashboard</p>
         </div>
 
-        <div className="card p-8 animate-slide-up">
+        <div className="rounded-3xl p-8 shadow-2xl animate-fade-in-up stagger-2" style={{background: 'rgba(255,255,255,0.45)', backdropFilter: 'blur(24px)', WebkitBackdropFilter: 'blur(24px)', border: '1px solid rgba(255,255,255,0.6)'}}>
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label className="label" htmlFor="email">Email address</label>
@@ -55,7 +63,7 @@ export default function Login() {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1">
+              <div className="flex items-center justify-between mb-1.5">
                 <label className="label mb-0" htmlFor="password">Password</label>
               </div>
               <div className="relative">
@@ -82,7 +90,7 @@ export default function Login() {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full justify-center">
+            <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-3 text-base mt-2">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? 'Signing in…' : 'Sign in'}
             </button>
@@ -90,7 +98,7 @@ export default function Login() {
 
           <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-brand-600 hover:text-brand-700 font-medium">
+            <Link to="/register" className="text-brand-600 hover:text-brand-700 font-semibold">
               Create one
             </Link>
           </p>

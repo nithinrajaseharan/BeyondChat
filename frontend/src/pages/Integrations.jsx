@@ -89,31 +89,46 @@ export default function Integrations() {
   const isSyncing    = syncStatus === 'syncing' || syncStatus === 'pending'
 
   return (
-    <div className="p-4 md:p-6 max-w-2xl mx-auto animate-fade-in">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">Integrations</h1>
-      <p className="text-gray-500 dark:text-gray-400 text-sm mb-6">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto animate-fade-in-up">
+      <h1 className="text-3xl font-bold gradient-text mb-1 animate-fade-in-up stagger-1">Integrations</h1>
+      <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 animate-fade-in-up stagger-2">
         Connect external services to enhance your dashboard.
       </p>
 
-      <div className="card p-5 md:p-6">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div className="flex items-center gap-3">
-            <GmailLogo />
-            <div>
-              <p className="font-semibold text-gray-900 dark:text-white">Gmail</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {connected ? status.gmail_address : 'Not connected'}
-              </p>
-            </div>
-          </div>
+      <div className="card overflow-hidden animate-fade-in-up stagger-3">
 
-          {connected && (
-            <span className={`badge ${statusMeta.bg} ${statusMeta.color}`}>
-              {isSyncing ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
-              {statusMeta.label}
-            </span>
-          )}
+        {/* Card header — gradient when connected */}
+        <div className={`p-5 md:p-6 ${
+          connected
+            ? 'bg-gradient-to-br from-brand-50 to-indigo-50 dark:from-brand-950/40 dark:to-indigo-950/40 border-b border-brand-100 dark:border-brand-900/30'
+            : ''
+        }`}>
+          <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-3">
+              <GmailLogo />
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white">Gmail</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  {connected ? status.gmail_address : 'Not connected'}
+                </p>
+              </div>
+            </div>
+
+            {connected && (
+              <div className="relative">
+                {(syncStatus === 'idle' || syncStatus === 'completed') && (
+                  <span className="animate-pulse-ring absolute inset-0 rounded-full bg-green-400/30" />
+                )}
+                <span className={`badge relative ${statusMeta.bg} ${statusMeta.color}`}>
+                  {isSyncing ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <CheckCircle2 className="w-3 h-3 mr-1" />}
+                  {statusMeta.label}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
+
+        <div className="p-5 md:p-6">
 
         {isSyncing && (
           <div className="mt-4">
@@ -121,9 +136,9 @@ export default function Integrations() {
               <span>Syncing emails…</span>
               <span>{syncProgress}%</span>
             </div>
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div className="h-2.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-brand-500 rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-brand-500 to-indigo-500 rounded-full transition-all duration-500 animate-progress-glow"
                 style={{ width: `${syncProgress}%` }}
               />
             </div>
@@ -137,16 +152,16 @@ export default function Integrations() {
 
         {connected && !isSyncing && (
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+            <div className="bg-gradient-to-br from-brand-50 to-indigo-50 dark:from-brand-950/30 dark:to-indigo-950/30 rounded-xl p-3 border border-brand-100 dark:border-brand-900/20">
               <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Sync Range</p>
               <div className="flex items-center gap-1.5">
                 <Calendar className="w-4 h-4 text-brand-500" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Last {status.sync_days} days</span>
+                <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Last {status.sync_days} days</span>
               </div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+            <div className="bg-gradient-to-br from-brand-50 to-indigo-50 dark:from-brand-950/30 dark:to-indigo-950/30 rounded-xl p-3 border border-brand-100 dark:border-brand-900/20">
               <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Last Synced</p>
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+              <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                 {status.last_synced_at
                   ? new Date(status.last_synced_at).toLocaleString()
                   : 'Never'}
@@ -190,7 +205,8 @@ export default function Integrations() {
             </>
           )}
         </div>
-      </div>
+        </div>{/* end p-5 body */}
+      </div>{/* end card */}
 
       {/* Other integrations placeholder */}
       <div className="card p-5 mt-4 opacity-60 cursor-not-allowed select-none">
