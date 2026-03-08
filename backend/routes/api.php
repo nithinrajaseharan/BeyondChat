@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EmailController;
 use App\Http\Controllers\GmailController;
+use App\Http\Controllers\AiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -50,5 +51,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('/{threadId}/star',         [EmailController::class, 'toggleStar']);
         Route::patch('/{threadId}/read',         [EmailController::class, 'markRead']);
         Route::patch('/{threadId}/status',       [EmailController::class, 'updateStatus']);
+        Route::post('/{threadId}/ai-reply',      [AiController::class, 'suggestReply']);
     });
 });

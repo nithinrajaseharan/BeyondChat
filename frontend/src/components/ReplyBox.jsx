@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api.js'
 import toast from 'react-hot-toast'
-import { X, Send, Loader2, ChevronDown, Sparkles } from 'lucide-react'
+import { X, Send, Loader2, ChevronDown, Sparkles, Wand2 } from 'lucide-react'
 
 const TEMPLATES = [
   "Thanks for reaching out! I'll look into this and get back to you shortly.",
@@ -23,6 +23,17 @@ export default function ReplyBox({ thread, onClose }) {
   const [showCC,        setShowCC]       = useState(false)
   const [cc,            setCc]           = useState('')
   const [showTemplates, setShowTemplates] = useState(false)
+
+  const aiMutation = useMutation({
+    mutationFn: () => api.post(`/emails/${thread.id}/ai-reply`),
+    onSuccess: (res) => {
+      setBody(res.data.suggestion)
+      toast.success('AI draft ready — review before sending.')
+    },
+    onError: (err) => {
+      toast.error(err.response?.data?.message || 'AI suggestion failed.')
+    },
+  })
 
   const mutation = useMutation({
     mutationFn: (data) => api.post(`/emails/${thread.id}/reply`, data),
@@ -129,6 +140,17 @@ export default function ReplyBox({ thread, onClose }) {
                 </div>
               )}
             </div>
+            <button
+              type="button"
+              onClick={() => aiMutation.mutate()}
+              disabled={aiMutation.isPending}
+              className="btn-ghost text-xs gap-1 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-900/20 disabled:opacity-50"
+              title="Generate a reply draft using AI"
+            >
+              {aiMutation.isPending
+                ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Generating…</>
+                : <><Wand2 className="w-3.5 h-3.5" /> Write with AI</>}
+            </button>
             <p className="text-xs text-gray-400">
               Thread: <span className="font-medium">{thread.subject}</span>
             </p>

@@ -21,8 +21,11 @@ The assignment asked for a Gmail integration dashboard � connect Gmail, sync e
 - **Dark mode** � fully implemented, not just a wrapper
 - **Star threads** � quick way to flag emails you want to revisit
 - **Real-time sync progress bar** � polls the backend every 2 seconds while the queue worker runs, so you can see it actually doing something
-- **Search + filter** � filter by category, search by subject/sender across all synced threads
-
+- **Search + filter** � filter by category, search by subject/sender across all synced threads- **Thread status** — mark any thread as Open / In Progress / Resolved, turning the inbox into a lightweight support queue. Status is colour-coded (gray / amber / green) and shown in both the list and the thread header
+- **SLA warning** — a red clock icon appears next to the timestamp whenever an unread thread has been waiting more than 4 hours, so nothing slips through
+- **Keyboard navigation** — full keyboard control without touching the mouse: `J`/`K` move between threads, `R` toggles the reply box, `S` stars/unstars, `Escape` closes the thread, `?` opens a shortcuts help overlay
+- **Quick reply templates** — one-click pre-written responses ("Thanks for reaching out…", "Could you share more details…", etc.) that fill the reply box instantly
+- **AI-assisted reply** — a "Write with AI" button in the reply box sends the full email thread to Groq (Llama 3.3 70B) and drafts a professional reply in seconds, which you can edit before sending
 ---
 
 ## Architecture
@@ -165,7 +168,12 @@ GOOGLE_CLIENT_ID=your-client-id
 GOOGLE_CLIENT_SECRET=your-client-secret
 GOOGLE_REDIRECT_URI=http://localhost:8000/api/gmail/callback
 FRONTEND_URL=http://localhost:5173
+
+# Optional — enables "Write with AI" in the reply box
+GROQ_API_KEY=your-groq-api-key
 ```
+
+> Get a free Groq API key at [console.groq.com](https://console.groq.com). Leave it blank to use the app without AI features — everything else still works.
 
 ```bash
 # Create the database
@@ -211,33 +219,37 @@ Open `http://localhost:5173`, register an account, and connect Gmail.
 ```
 BeyondChat/
 +-- backend/
-�   +-- app/Http/Controllers/
-�   �   +-- AuthController.php       register, login, logout
-�   �   +-- GmailController.php      OAuth flow, sync trigger, status, disconnect
-�   �   +-- EmailController.php      thread list, thread detail, reply, attachments
-�   +-- app/Jobs/
-�   �   +-- SyncEmailsJob.php        background worker: fetches + stores emails
-�   +-- app/Models/
-�   �   +-- GmailIntegration.php     stores OAuth tokens + sync state
-�   �   +-- EmailThread.php
-�   �   +-- Email.php
-�   �   +-- EmailAttachment.php
-�   +-- app/Services/
-�   �   +-- GmailService.php         wraps Google API client
-�   +-- database/migrations/         5 migration files
-�   +-- routes/api.php
-�
+|   +-- app/Http/Controllers/
+|   |   +-- AuthController.php       register, login, logout
+|   |   +-- GmailController.php      OAuth flow, sync trigger, status, disconnect
+|   |   +-- EmailController.php      thread list, thread detail, reply, star, status
+|   |   +-- AiController.php         AI reply suggestion via Groq API
+|   +-- app/Jobs/
+|   |   +-- SyncEmailsJob.php        background worker: fetches + stores emails
+|   +-- app/Models/
+|   |   +-- GmailIntegration.php     stores OAuth tokens + sync state
+|   |   +-- EmailThread.php
+|   |   +-- Email.php
+|   |   +-- EmailAttachment.php
+|   +-- app/Services/
+|   |   +-- GmailService.php         wraps Google API client
+|   +-- database/migrations/         6 migration files (incl. thread status column)
+|   +-- routes/api.php
+|
 +-- frontend/src/
     +-- pages/
-    �   +-- Dashboard.jsx            summary stats + recent threads
-    �   +-- Chats.jsx                thread list with search + filter
-    �   +-- Integrations.jsx         connect Gmail, start sync
-    �   +-- Analytics.jsx            email volume charts, top senders
+    |   +-- Dashboard.jsx            summary stats + recent threads
+    |   +-- Chats.jsx                thread list with search, filter, keyboard nav
+    |   +-- Integrations.jsx         connect Gmail, start sync
+    |   +-- Analytics.jsx            email volume charts, top senders
     +-- components/
-    �   +-- EmailThread.jsx          full conversation viewer
-    �   +-- ReplyBox.jsx             compose reply inline
-    �   +-- SyncModal.jsx            day range picker before sync
-    �   +-- Layout.jsx               sidebar nav + dark mode toggle
+    |   +-- EmailThread.jsx          full conversation viewer + status selector
+    |   +-- ReplyBox.jsx             compose reply, quick templates, AI draft
+    |   +-- EmailList.jsx            thread rows with SLA warning + status badge
+    |   +-- SyncModal.jsx            day range picker before sync
+    |   +-- Layout.jsx               sidebar nav + dark mode toggle
+    +-- hooks/
+    |   +-- useKeyboardNav.js        J/K/Escape keyboard thread navigation
     +-- contexts/AuthContext.jsx     global auth state
     +-- services/api.js              axios with Authorization header
 ```
@@ -263,6 +275,8 @@ BeyondChat/
 | POST | `/api/emails/{id}/reply` | yes | `{ body, to, cc }` |
 | PATCH | `/api/emails/{id}/star` | yes | Toggle star |
 | PATCH | `/api/emails/{id}/read` | yes | Mark as read |
+| PATCH | `/api/emails/{id}/status` | yes | Set status: `open` / `in_progress` / `resolved` |
+| POST | `/api/emails/{id}/ai-reply` | yes | Returns Groq-generated reply draft |
 | GET | `/api/emails/analytics` | yes | Volume + sender stats |
 | GET | `/api/emails/attachment/{id}` | yes | Download file |
 
