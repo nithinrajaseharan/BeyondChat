@@ -3,27 +3,10 @@ import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import {
   LayoutDashboard, Mail, Plug, BarChart2, LogOut,
-  Menu, X, Moon, Sun, ChevronDown,
+  Menu, X, ChevronDown,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import api from '../services/api.js'
-
-function useDarkMode() {
-  const [dark, setDark] = useState(() =>
-    document.documentElement.classList.contains('dark') ||
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-  )
-
-  const toggle = () => {
-    setDark(d => {
-      const next = !d
-      document.documentElement.classList.toggle('dark', next)
-      return next
-    })
-  }
-
-  return [dark, toggle]
-}
 
 const NAV = [
   { to: '/dashboard',    label: 'Dashboard',    icon: LayoutDashboard },
@@ -36,7 +19,6 @@ export default function Layout() {
   const { user, logout } = useAuth()
   const navigate          = useNavigate()
   const [open,  setOpen]  = useState(false)
-  const [dark,  toggleDark] = useDarkMode()
 
   const { data: gmailStatus } = useQuery({
     queryKey: ['gmail-status'],
@@ -91,14 +73,6 @@ export default function Layout() {
         <div className="flex-1" />
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={toggleDark}
-            className="btn-ghost hidden sm:flex"
-            aria-label="Toggle dark mode"
-          >
-            {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-          </button>
-
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0 shadow-sm">
               {user?.name?.[0]?.toUpperCase() || 'U'}
@@ -148,17 +122,10 @@ export default function Layout() {
             ))}
           </nav>
 
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-800 space-y-1">
-            <button
-              onClick={toggleDark}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              {dark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-              {dark ? 'Light mode' : 'Dark mode'}
-            </button>
+          <div className="mt-6 pt-4 border-t border-gray-200 space-y-1">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+              className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50"
             >
               <LogOut className="w-5 h-5" />
               Logout
